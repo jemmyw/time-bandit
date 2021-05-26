@@ -1,0 +1,33 @@
+{
+  "name": "jemmyw.time-bandit",
+  "description": "Time Bandit",
+  "version": "0.0.0",
+  "author": "jemmyw",
+  "repository": {
+    "type": "git",
+    "url": "TODO: Add the GitHub URL to your extension in package.json"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "node build.js"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.8",
+    "aha-cli": "1.9.7",
+    "esbuild": "^0.12.3"
+  },
+  "ahaExtension": {
+    "contributes": {
+      "views": {
+        "page": {
+          "title": "Time Bandit",
+          "entryPoint": "dist/bundle.js",
+          "host": "page",
+          "location": {
+            "menu": "Plan"
+          }
+        }
+      }
+    }
+  }
+}
