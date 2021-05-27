@@ -1,30 +1,15 @@
 import React, { createRef, useEffect, useRef, useState } from "react";
 // @ts-ignore
 import lines from "../images/lineso.svg";
+import { SvgObject } from "../SvgObject";
 
 const blob = new Blob([lines], { type: "image/svg+xml" });
 const linesUrl = URL.createObjectURL(blob);
 
 export function World() {
-  const linesRef = createRef<HTMLObjectElement>();
   const zoneRef = useRef();
-  const [incLoader, setIncLoader] = useState(0);
 
-  useEffect(() => {
-    if (!linesRef.current) return;
-
-    const objectElement = linesRef.current;
-    if (objectElement.data !== linesUrl) objectElement.data = linesUrl;
-    updateWorld();
-  }, [linesRef, incLoader]);
-
-  const updateWorld = () => {
-    if (!linesRef.current) return;
-    const objectElement = linesRef.current;
-    if (!objectElement) return;
-    const svg = objectElement.contentDocument;
-    if (!svg) return;
-
+  const updateWorld = (svg) => {
     let zone: any = null;
 
     svg?.querySelectorAll("g").forEach((g) => {
@@ -38,10 +23,8 @@ export function World() {
     }
 
     if (zoneRef.current === zone) return;
-    console.log("start anim");
     zoneRef.current = zone;
 
-    zone.style.opacity = 0.5;
     zone.id = "zones";
 
     const zones = [
@@ -85,11 +68,10 @@ export function World() {
       }, idx * 100);
     });
 
-    objectElement.style.opacity = "0.0";
+    zone.style.opacity = "0.0";
     setTimeout(() => {
-      objectElement.style.transition = "opacity 1s";
-      objectElement.style.visibility = "visible";
-      objectElement.style.opacity = "1.0";
+      zone.style.transition = "opacity 1s";
+      zone.style.opacity = "0.5";
     }, 250);
 
     return () => {
@@ -104,14 +86,12 @@ export function World() {
 
   return (
     <div className="world">
-      <object
-        ref={linesRef}
+      <SvgObject
+        data={linesUrl}
         onLoad={updateWorld}
-        id="lines"
-        data=""
-        type="image/svg+xml"
         style={{ visibility: "hidden" }}
-      ></object>
+        hideUntilLoad
+      />
     </div>
   );
 }

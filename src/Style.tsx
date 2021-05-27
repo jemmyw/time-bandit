@@ -22,8 +22,7 @@ export function Style() {
         }
 
         .world {
-          width: 1000px;
-          height: 1000px;
+          margin: 0 20px;
           background-image: url(${zones});
           background-repeat: no-repeat;
           background-size: contain;

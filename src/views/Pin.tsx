@@ -1,6 +1,7 @@
-import React, { createRef, useEffect, useState } from "react";
+import React from "react";
 // @ts-ignore
 import pin from "../images/pin.svg";
+import { SvgObject } from "../SvgObject";
 
 const blob = new Blob([pin], { type: "image/svg+xml" });
 const pinUrl = URL.createObjectURL(blob);
@@ -12,30 +13,15 @@ interface Props {
 }
 
 export const Pin: React.FC<Props> = ({ imgSrc, style, className }) => {
-  const objectRef = createRef<HTMLObjectElement>();
-
-  const update = () => {
-    if (!objectRef.current) return;
-    const svg = objectRef.current.contentDocument;
-    if (!svg) return;
+  const update = (svg) => {
     const face = svg.getElementById("face");
     if (!face) return;
     face.setAttribute("xlink:href", imgSrc);
   };
 
-  useEffect(() => {
-    update();
-  }, [objectRef, imgSrc]);
-
   return (
     <div className={`pin ${className}`} style={style}>
-      <object
-        ref={objectRef}
-        data={pinUrl}
-        type="image/svg+xml"
-        onLoad={update}
-        style={{ width: "100%" }}
-      ></object>
+      <SvgObject data={pinUrl} onLoad={update} style={{ width: "100%" }} />
     </div>
   );
 };
