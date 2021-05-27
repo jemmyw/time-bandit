@@ -46,7 +46,7 @@ function App() {
       </div>
       <aha-flex direction="column">
         {project ? <GroupedUsers users={users} /> : <aha-spinner />}
-        <World />
+        <World highlight={["-7"]} />
       </aha-flex>
     </div>
   );

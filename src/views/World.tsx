@@ -39,12 +39,35 @@ type Offset =
   | "11"
   | "12";
 
+const getLabel = (el: SVGElement) => el.getAttribute("inkscape:label");
+const stripedOpacity = (index: number) => (index % 2 === 0 ? "0.1" : "0.3");
 interface Props {
-  highlight: Offset[];
+  highlight?: Offset[];
 }
 
 export const World: React.FC<Props> = ({ highlight }) => {
   const zoneRef = useRef<SVGElement>();
+  const zonesRef = useRef<SVGElement[]>();
+
+  const updateHighlight = useCallback((zone: SVGElement, idx: number) => {
+    if (highlight.includes(getLabel(zone) as Offset)) {
+      zone.style.opacity = "1.0";
+    } else {
+      zone.style.opacity = stripedOpacity(idx);
+    }
+  }, []);
+
+  const updateHighlights = useCallback(() => {
+    if (!zonesRef.current) return;
+
+    zonesRef.current.forEach((zone, idx) => {
+      updateHighlight(zone, idx);
+    });
+  }, [zonesRef]);
+
+  useEffect(() => {
+    updateHighlights();
+  }, [highlight]);
 
   const initializeWorld = useCallback((svg: Document) => {
     let zone: any = null;
@@ -64,6 +87,7 @@ export const World: React.FC<Props> = ({ highlight }) => {
 
     zone.id = "zones";
 
+    const timeouts = [];
     const zones = [
       ...(svg.querySelectorAll(`#${zone.id} > g`) as any),
     ].reverse() as SVGElement[];
@@ -97,21 +121,31 @@ export const World: React.FC<Props> = ({ highlight }) => {
         group.addEventListener("mouseout", zoneMouseOutEvent);
       });
 
-      setTimeout(() => {
-        zone.style.opacity = "0.6";
+      timeouts.push(
         setTimeout(() => {
-          zone.style.opacity = idx % 2 === 0 ? "0.1" : "0.3";
-        }, 100);
-      }, 1000 + idx * 100);
+          zone.style.opacity = "0.6";
+          timeouts.push(
+            setTimeout(() => {
+              updateHighlight(zone, idx);
+            }, 100)
+          );
+        }, 100 + idx * 100)
+      );
     });
 
     zone.style.opacity = "0.0";
-    setTimeout(() => {
-      zone.style.transition = "opacity 1s";
-      zone.style.opacity = "0.5";
-    }, 250);
+    timeouts.push(
+      setTimeout(() => {
+        zone.style.transition = "opacity 1s";
+        zone.style.opacity = "0.5";
+      }, 250)
+    );
 
     return () => {
+      timeouts.forEach((timeout) => {
+        clearTimeout(timeout);
+      });
+
       zones.forEach((zone) => {
         zone.childNodes.forEach((group) => {
           group.removeEventListener("mouseover", zoneMouseOverEvent);
