@@ -12,6 +12,7 @@
     "start": "node build.js"
   },
   "devDependencies": {
+    "@types/luxon": "^1.26.5",
     "@types/react": "^17.0.8",
     "aha-cli": "1.9.7",
     "esbuild": "^0.12.3"
@@ -29,5 +30,8 @@
         }
       }
     }
+  },
+  "dependencies": {
+    "luxon": "^1.27.0"
   }
 }
