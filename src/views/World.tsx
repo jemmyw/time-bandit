@@ -53,7 +53,7 @@ export function World() {
     zones.forEach((zone, idx) => {
       // zone.style.opacity = idx % 2 === 0 ? "0.1" : "0.3";
       zone.style.opacity = "0";
-      zone.style.transition = "opacity 0.3s";
+      // zone.style.transition = "opacity 0.2s";
 
       zone.childNodes.forEach((group) => {
         group.addEventListener("mouseover", zoneMouseOverEvent);
@@ -64,8 +64,8 @@ export function World() {
         zone.style.opacity = "0.6";
         setTimeout(() => {
           zone.style.opacity = idx % 2 === 0 ? "0.1" : "0.3";
-        }, 300);
-      }, idx * 100);
+        }, 100);
+      }, 1000 + (idx * 100));
     });
 
     zone.style.opacity = "0.0";

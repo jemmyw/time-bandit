@@ -1,7 +1,13 @@
-import React, { createRef, useCallback, useEffect, useState } from "react";
+import React, {
+  createRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 interface Props {
-  onLoad(svg: Document): void;
+  onLoad(svg: Document): Function | null;
   data: string;
   style?: React.CSSProperties;
   className?: string;
@@ -16,15 +22,32 @@ export const SvgObject: React.FC<Props> = ({
   hideUntilLoad,
 }) => {
   const objectRef = createRef<HTMLObjectElement>();
+  const unloadRef = useRef<Function>();
   const [loaded, setLoaded] = useState(false);
 
   const update = useCallback(() => {
     if (!objectRef.current) return;
     const svg = objectRef.current.contentDocument;
     if (!svg) return;
-    if (onLoad) onLoad(svg);
+
+    // Call the unload function if we're re-running
+    if (unloadRef.current) unloadRef.current();
+
+    let unloadFunction: Function | null = null;
+    if (onLoad) {
+      unloadFunction = onLoad(svg);
+    }
+    unloadRef.current = unloadFunction;
+
     setLoaded(true);
   }, [onLoad]);
+
+  // On unmount call the unload function
+  useEffect(() => {
+    return () => {
+      if (unloadRef.current) unloadRef.current();
+    };
+  }, []);
 
   const objectStyle = { ...style };
   objectStyle.visibility = hideUntilLoad && !loaded ? "hidden" : "visible";
