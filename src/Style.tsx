@@ -28,6 +28,11 @@ export function Style() {
           background-repeat: no-repeat;
           background-size: contain;
         }
+
+        .pin {
+          width: 50px;
+          position: absolute;
+        }
       `}
     </style>
   );
