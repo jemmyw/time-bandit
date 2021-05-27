@@ -1,4 +1,10 @@
-import React, { createRef, useEffect, useRef, useState } from "react";
+import React, {
+  createRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 // @ts-ignore
 import lines from "../images/lineso.svg";
 import { SvgObject } from "../SvgObject";
@@ -6,13 +12,44 @@ import { SvgObject } from "../SvgObject";
 const blob = new Blob([lines], { type: "image/svg+xml" });
 const linesUrl = URL.createObjectURL(blob);
 
-export function World() {
-  const zoneRef = useRef();
+type Offset =
+  | "-12"
+  | "-11"
+  | "-10"
+  | "-9"
+  | "-8"
+  | "-7"
+  | "-6"
+  | "-5"
+  | "-4"
+  | "-3"
+  | "-2"
+  | "-1"
+  | "0"
+  | "1"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | "10"
+  | "11"
+  | "12";
 
-  const updateWorld = (svg) => {
+interface Props {
+  highlight: Offset[];
+}
+
+export const World: React.FC<Props> = ({ highlight }) => {
+  const zoneRef = useRef<SVGElement>();
+
+  const initializeWorld = useCallback((svg: Document) => {
     let zone: any = null;
 
-    svg?.querySelectorAll("g").forEach((g) => {
+    svg.querySelectorAll("g").forEach((g) => {
       if (g.getAttribute("inkscape:label") === "zones") {
         zone = g;
       }
@@ -28,7 +65,7 @@ export function World() {
     zone.id = "zones";
 
     const zones = [
-      ...(svg?.querySelectorAll(`#${zone.id} > g`) as any),
+      ...(svg.querySelectorAll(`#${zone.id} > g`) as any),
     ].reverse() as SVGElement[];
 
     const zoneMouseOverEvent = (event: any) => {
@@ -65,7 +102,7 @@ export function World() {
         setTimeout(() => {
           zone.style.opacity = idx % 2 === 0 ? "0.1" : "0.3";
         }, 100);
-      }, 1000 + (idx * 100));
+      }, 1000 + idx * 100);
     });
 
     zone.style.opacity = "0.0";
@@ -82,16 +119,16 @@ export function World() {
         });
       });
     };
-  };
+  }, []);
 
   return (
     <div className="world">
       <SvgObject
         data={linesUrl}
-        onLoad={updateWorld}
+        onLoad={initializeWorld}
         style={{ visibility: "hidden" }}
         hideUntilLoad
       />
     </div>
   );
-}
+};

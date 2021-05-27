@@ -17,7 +17,6 @@ const loadUsers = async () => {
 };
 
 function App() {
-  const [avatarUrl, setAvatarUrl] = useState<string>();
   const containerRef = createRef<HTMLDivElement>();
   const [bodyHeight, setBodyHeight] = useState(document.body.scrollHeight);
 
