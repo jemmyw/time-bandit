@@ -61,8 +61,8 @@ function App() {
 
   const effectZones = useOffsetEffect({
     color: "#f0c",
-    interval: 75,
-    delay: 250,
+    interval: 50,
+    delay: 50,
   });
   const [overZone, setOverZone] = useState<Offset>(null);
   const zones = useMemo(() => {
@@ -80,7 +80,20 @@ function App() {
     };
 
     if (selectedZone) {
-      zones[zoneToOffset(selectedZone)] = { color: "#f00", opacity: 0.5 };
+      const offset = zoneToOffset(selectedZone);
+      zones[offset] = { color: "#ff0", opacity: 0.5 };
+
+      const offsetIndex = offsets.indexOf(offset) + offsets.length;
+      const offsetX = offsets.concat(offsets).concat(offsets);
+
+      [0, 0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.5, 0.5, 0.6, 0.6, 0.6].forEach(
+        (opacity, idx) => {
+          let offset = offsetX[offsetIndex + idx + 1];
+          zones[offset] = { color: zones[offset]?.color || "#000", opacity };
+          offset = offsetX[offsetIndex - (idx + 1)];
+          zones[offset] = { color: zones[offset]?.color || "#000", opacity };
+        }
+      );
     }
 
     if (overZone) {

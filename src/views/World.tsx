@@ -102,7 +102,6 @@ export const World: React.FC<Props> = ({
     // });
     visibleZones.current.forEach((zone) => (zone.style.opacity = "0.0"));
     visibleZones.current = [];
-    console.log(zones);
 
     Object.entries(highlight || {}).forEach(([offset, props]) => {
       const zone = zones[offset as Offset];
@@ -123,7 +122,6 @@ export const World: React.FC<Props> = ({
   }, [highlight, updateHighlights]);
 
   const initializeWorld = useCallback((svg: Document) => {
-    console.log("init world");
     let zonesGroup: any = null;
 
     svg.querySelectorAll("g").forEach((g) => {
