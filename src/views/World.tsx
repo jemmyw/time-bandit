@@ -1,10 +1,4 @@
-import React, {
-  createRef,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 // @ts-ignore
 import lines from "../images/lineso.svg";
 import { SvgObject } from "../SvgObject";
@@ -12,7 +6,7 @@ import { SvgObject } from "../SvgObject";
 const blob = new Blob([lines], { type: "image/svg+xml" });
 const linesUrl = URL.createObjectURL(blob);
 
-type Offset =
+export type Offset =
   | "-12"
   | "-11"
   | "-10"
@@ -47,27 +41,29 @@ interface Props {
 
 export const World: React.FC<Props> = ({ highlight }) => {
   const zoneRef = useRef<SVGElement>();
-  const zonesRef = useRef<SVGElement[]>();
+  const [zones, setZones] = useState<SVGElement[]>([]);
 
-  const updateHighlight = useCallback((zone: SVGElement, idx: number) => {
-    if (highlight.includes(getLabel(zone) as Offset)) {
-      zone.style.opacity = "1.0";
-    } else {
-      zone.style.opacity = stripedOpacity(idx);
-    }
-  }, []);
+  const updateHighlight = useCallback(
+    (zone: SVGElement, idx: number) => {
+      if (highlight.includes(getLabel(zone) as Offset)) {
+        zone.style.opacity = "1.0";
+      } else {
+        zone.style.opacity = stripedOpacity(idx);
+      }
+    },
+    [highlight]
+  );
 
   const updateHighlights = useCallback(() => {
-    if (!zonesRef.current) return;
-
-    zonesRef.current.forEach((zone, idx) => {
+    console.log("update highlights");
+    zones.forEach((zone, idx) => {
       updateHighlight(zone, idx);
     });
-  }, [zonesRef]);
+  }, [zones]);
 
   useEffect(() => {
     updateHighlights();
-  }, [highlight]);
+  }, [highlight, updateHighlights]);
 
   const initializeWorld = useCallback((svg: Document) => {
     let zone: any = null;
@@ -126,7 +122,7 @@ export const World: React.FC<Props> = ({ highlight }) => {
           zone.style.opacity = "0.6";
           timeouts.push(
             setTimeout(() => {
-              updateHighlight(zone, idx);
+              setZones((zones) => [...zones, zone]);
             }, 100)
           );
         }, 100 + idx * 100)
@@ -160,7 +156,7 @@ export const World: React.FC<Props> = ({ highlight }) => {
       <SvgObject
         data={linesUrl}
         onLoad={initializeWorld}
-        style={{ visibility: "hidden" }}
+        style={{ visibility: "hidden", height: "100%" }}
         hideUntilLoad
       />
     </div>

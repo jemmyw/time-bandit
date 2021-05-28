@@ -30,15 +30,12 @@ export function Style() {
           background-image: url(${zones});
           background-repeat: no-repeat;
           background-size: contain;
-        }
-
-        .pin {
-          width: 50px;
-          position: absolute;
+          height: 100%;
         }
 
         .grouped-users {
           display: flex;
+          flex-shrink: 0;
           justify-content: space-between;
           gap: 5px;
           margin: 0 20px;

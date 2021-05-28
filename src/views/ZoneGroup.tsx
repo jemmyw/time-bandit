@@ -12,8 +12,10 @@ const ZoneGroupTime: React.FC<{ time: DateTime }> = ({ time }) => {
 
   return (
     <span>
-      {parts.map(({ type, value }) => (
-        <span className={type}>{value}</span>
+      {parts.map(({ type, value }, idx) => (
+        <span key={idx} className={type}>
+          {value}
+        </span>
       ))}
     </span>
   );
