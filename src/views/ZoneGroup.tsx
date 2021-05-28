@@ -1,5 +1,7 @@
 import { DateTime, IANAZone } from "luxon";
 import React, { useEffect, useRef, useState } from "react";
+import { useRecoilState } from "recoil";
+import { selectedZoneState } from "./store";
 import { ZoneUser } from "./ZoneUser";
 
 interface Props {
@@ -24,6 +26,7 @@ const ZoneGroupTime: React.FC<{ time: DateTime }> = ({ time }) => {
 export const ZoneGroup: React.FC<Props> = ({ zone, users }) => {
   const intervalHandle = useRef<any>();
   const [time, setTime] = useState(DateTime.local().setZone(zone));
+  const [_, setSelectedZone] = useRecoilState(selectedZoneState);
 
   useEffect(() => {
     intervalHandle.current = setInterval(() => {
@@ -35,8 +38,20 @@ export const ZoneGroup: React.FC<Props> = ({ zone, users }) => {
     };
   }, [zone]);
 
+  const handleMouseOver = () => {
+    setSelectedZone(zone);
+  };
+
+  const handleMouseOut = () => {
+    setSelectedZone(null);
+  };
+
   return (
-    <div className="zone-group">
+    <div
+      className="zone-group"
+      onMouseOver={handleMouseOver}
+      onMouseOut={handleMouseOut}
+    >
       <div className="zone-group--header">
         <span className="zone-group--offset">
           {zone.offsetName(new Date().valueOf(), { format: "short" })}

@@ -32,6 +32,8 @@
     }
   },
   "dependencies": {
-    "luxon": "^1.27.0"
+    "@aha-app/aha-develop-react": "^1.0.5",
+    "luxon": "^1.27.0",
+    "recoil": "^0.3.1"
   }
 }

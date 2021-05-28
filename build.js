@@ -16,7 +16,7 @@ esbuild
     entryPoints: ["src/index.tsx"],
     outfile: "dist/bundle.js",
     bundle: true,
-    external: ["react"],
+    external: ["react", "react-dom"],
     loader: {
       ".png": "dataurl",
       ".svg": "binary",

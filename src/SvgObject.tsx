@@ -21,14 +21,29 @@ export const SvgObject: React.FC<Props> = ({
   className,
   hideUntilLoad,
 }) => {
-  const objectRef = createRef<HTMLObjectElement>();
+  const objectRef = useRef<HTMLObjectElement>();
   const unloadRef = useRef<Function>();
   const [loaded, setLoaded] = useState(false);
+  const [called, setCalled] = useState(false);
 
-  const update = useCallback(() => {
-    if (!objectRef.current) return;
+  const onLoaded = () => {
+    setLoaded(true);
+  };
+
+  useEffect(() => {
+    if (!loaded) {
+      console.log("bail, not loaded");
+      return;
+    }
+    if (!objectRef.current) {
+      console.log("bail, no object ref");
+      return;
+    }
     const svg = objectRef.current.contentDocument;
-    if (!svg) return;
+    if (!svg) {
+      console.log("bail, no svg");
+      return;
+    }
 
     // Call the unload function if we're re-running
     if (unloadRef.current) unloadRef.current();
@@ -36,11 +51,12 @@ export const SvgObject: React.FC<Props> = ({
     let unloadFunction: Function | null = null;
     if (onLoad) {
       unloadFunction = onLoad(svg);
+    } else {
+      console.log("no onLoad");
     }
     unloadRef.current = unloadFunction;
-
-    setLoaded(true);
-  }, [onLoad]);
+    setCalled(true);
+  }, [onLoad, loaded, objectRef]);
 
   // On unmount call the unload function
   useEffect(() => {
@@ -50,14 +66,14 @@ export const SvgObject: React.FC<Props> = ({
   }, []);
 
   const objectStyle = { ...style };
-  objectStyle.visibility = hideUntilLoad && !loaded ? "hidden" : "visible";
+  objectStyle.visibility = hideUntilLoad && !called ? "hidden" : "visible";
 
   return (
     <object
       ref={objectRef}
       data={data}
       type="image/svg+xml"
-      onLoad={update}
+      onLoad={onLoaded}
       style={objectStyle}
       className={className}
     ></object>

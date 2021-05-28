@@ -32,110 +32,160 @@ export type Offset =
   | "10"
   | "11"
   | "12";
+export const offsets: Offset[] = [
+  "-11",
+  "-10",
+  "-9",
+  "-8",
+  "-7",
+  "-6",
+  "-5",
+  "-4",
+  "-3",
+  "-2",
+  "-1",
+  "0",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "-12",
+];
 
 const getLabel = (el: SVGElement) => el.getAttribute("inkscape:label");
-const stripedOpacity = (index: number) => (index % 2 === 0 ? "0.1" : "0.3");
-interface Props {
-  highlight?: Offset[];
+
+export interface ZoneProps {
+  color: string;
+  opacity: number;
 }
 
-export const World: React.FC<Props> = ({ highlight }) => {
-  const zoneRef = useRef<SVGElement>();
-  const [zones, setZones] = useState<SVGElement[]>([]);
+export type ZoneProp = Record<Offset, ZoneProps>;
+interface Props {
+  zones?: ZoneProp;
+  onMouseOver?(offset: Offset): void;
+  onMouseOut?(offset: Offset): void;
+  onClick?(offset: Offset): void;
+}
 
-  const updateHighlight = useCallback(
-    (zone: SVGElement, idx: number) => {
-      if (highlight.includes(getLabel(zone) as Offset)) {
-        zone.style.opacity = "1.0";
-      } else {
-        zone.style.opacity = stripedOpacity(idx);
-      }
-    },
-    [highlight]
-  );
+export const World: React.FC<Props> = ({
+  zones: highlight,
+  onMouseOut,
+  onMouseOver,
+  onClick,
+}) => {
+  const zoneRef = useRef<SVGElement>();
+  const visibleZones = useRef<SVGElement[]>([]);
+  const [zones, setZones] = useState<Record<Offset, SVGElement>>({});
+
+  // const updateHighlight = useCallback(
+  //   (zone: SVGElement, idx: number) => {
+  //     if (highlight && highlight.includes(getLabel(zone) as Offset)) {
+  //       zone.style.opacity = "1.0";
+  //     } else {
+  //       zone.style.opacity = stripedOpacity(idx);
+  //     }
+  //   },
+  //   [highlight]
+  // );
 
   const updateHighlights = useCallback(() => {
-    console.log("update highlights");
-    zones.forEach((zone, idx) => {
-      updateHighlight(zone, idx);
+    // zones.forEach((zone, idx) => {
+    //   updateHighlight(zone, idx);
+    // });
+    visibleZones.current.forEach((zone) => (zone.style.opacity = "0.0"));
+    visibleZones.current = [];
+    console.log(zones);
+
+    Object.entries(highlight || {}).forEach(([offset, props]) => {
+      const zone = zones[offset as Offset];
+      if (!zone) return;
+
+      visibleZones.current = [...visibleZones.current, zone];
+
+      zone.childNodes.forEach((group) => {
+        if (group.setAttribute) group.setAttribute("fill", props.color);
+      });
+
+      zone.style.opacity = String(props.opacity);
     });
-  }, [zones]);
+  }, [zones, highlight]);
 
   useEffect(() => {
     updateHighlights();
   }, [highlight, updateHighlights]);
 
   const initializeWorld = useCallback((svg: Document) => {
-    let zone: any = null;
+    console.log("init world");
+    let zonesGroup: any = null;
 
     svg.querySelectorAll("g").forEach((g) => {
       if (g.getAttribute("inkscape:label") === "zones") {
-        zone = g;
+        zonesGroup = g;
       }
     });
 
-    if (!zone) {
+    if (!zonesGroup) {
+      console.log("bail, no zones group");
       return;
     }
+    if (zoneRef.current === zonesGroup) {
+      console.log("bail, zonesRef already set");
+      return;
+    }
+    zoneRef.current = zonesGroup;
 
-    if (zoneRef.current === zone) return;
-    zoneRef.current = zone;
-
-    zone.id = "zones";
+    zonesGroup.id = "zones";
 
     const timeouts = [];
     const zones = [
-      ...(svg.querySelectorAll(`#${zone.id} > g`) as any),
+      ...(svg.querySelectorAll(`#${zonesGroup.id} > g`) as any),
     ].reverse() as SVGElement[];
 
-    const zoneMouseOverEvent = (event: any) => {
+    const zoneEvent = (callback: (offset: Offset) => void) => (event: any) => {
+      if (!callback) return;
       const path = event.target as SVGElement;
       const zone = path.parentElement as any as SVGElement;
-
-      if (!zone.getAttribute("data-prev-opacity"))
-        zone.setAttribute("data-prev-opacity", zone.style.opacity);
-      zone.style.opacity = "1.0";
+      const offset = getLabel(zone) as Offset;
+      callback(offset);
     };
-
-    const zoneMouseOutEvent = (event: any) => {
-      const path = event.target as SVGElement;
-      const zone = path.parentElement as any as SVGElement;
-      const prevOpacity = zone.getAttribute("data-prev-opacity");
-      if (prevOpacity) {
-        zone.style.opacity = prevOpacity;
-        zone.removeAttribute("data-prev-opacity");
-      }
-    };
+    const clickEvent = zoneEvent(onClick);
+    const mouseOverEvent = zoneEvent(onMouseOver);
+    const mouseOutEvent = zoneEvent(onMouseOut);
+    const zoneState = {};
 
     zones.forEach((zone, idx) => {
-      // zone.style.opacity = idx % 2 === 0 ? "0.1" : "0.3";
-      zone.style.opacity = "0";
-      // zone.style.transition = "opacity 0.2s";
+      zone.style.opacity = "0.0";
 
       zone.childNodes.forEach((group) => {
-        group.addEventListener("mouseover", zoneMouseOverEvent);
-        group.addEventListener("mouseout", zoneMouseOutEvent);
+        group.addEventListener("mouseover", mouseOverEvent);
+        group.addEventListener("mouseout", mouseOutEvent);
+        group.addEventListener("click", clickEvent);
       });
 
-      timeouts.push(
-        setTimeout(() => {
-          zone.style.opacity = "0.6";
-          timeouts.push(
-            setTimeout(() => {
-              setZones((zones) => [...zones, zone]);
-            }, 100)
-          );
-        }, 100 + idx * 100)
-      );
+      zoneState[getLabel(zone)] = zone;
+
+      // timeouts.push(
+      //   setTimeout(() => {
+      //     zone.style.opacity = "0.6";
+      //     timeouts.push(
+      //       setTimeout(() => {
+      //         setZones((zones) => [...zones, zone]);
+      //       }, 100)
+      //     );
+      //   }, 100 + idx * 100)
+      // );
     });
 
-    zone.style.opacity = "0.0";
-    timeouts.push(
-      setTimeout(() => {
-        zone.style.transition = "opacity 1s";
-        zone.style.opacity = "0.5";
-      }, 250)
-    );
+    zonesGroup.style.opacity = "1.0";
+    setZones(zoneState);
 
     return () => {
       timeouts.forEach((timeout) => {
@@ -144,8 +194,9 @@ export const World: React.FC<Props> = ({ highlight }) => {
 
       zones.forEach((zone) => {
         zone.childNodes.forEach((group) => {
-          group.removeEventListener("mouseover", zoneMouseOverEvent);
-          group.removeEventListener("moutout", zoneMouseOutEvent);
+          group.removeEventListener("mouseover", mouseOverEvent);
+          group.removeEventListener("mouseout", mouseOutEvent);
+          group.removeEventListener("click", clickEvent);
         });
       });
     };

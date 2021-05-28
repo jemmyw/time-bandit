@@ -1,8 +1,12 @@
 import React, { createRef, useEffect, useMemo, useState } from "react";
+import { RecoilRoot, useRecoilState } from "recoil";
 import { groupByZone } from "../lib/groupByZone";
+import { useOffsetEffect } from "../lib/useOffsetEffect";
+import { zoneToOffset } from "../lib/zoneToOffset";
 import { Style } from "../Style";
 import { GroupedUsers } from "./GroupedUsers";
-import { Offset, World } from "./World";
+import { selectedZoneState } from "./store";
+import { Offset, offsets, World, ZoneProps } from "./World";
 
 const loadUsers = async () => {
   return await aha.models.Project.select("name", "isTeam")
@@ -25,6 +29,8 @@ function App() {
   const [project, setProject] = useState<Aha.Project | null>(null);
   const [users, setUsers] = useState<Aha.User[]>([]);
 
+  const [selectedZone] = useRecoilState(selectedZoneState);
+
   useEffect(() => {
     loadUsers().then((project) => {
       setProject(project);
@@ -33,34 +39,17 @@ function App() {
   }, []);
 
   const groupedUsers = useMemo(() => groupByZone(users), [users]);
-  const highlight = useMemo(() => {
-    const names = groupedUsers.map(([zone]) =>
-      zone.offsetName(new Date().valueOf(), { format: "short" })
-    );
-
-    return names.map((name) => {
-      if (name.includes("-")) {
-        return "-" + name.split("-")[1];
-      } else if (name.includes("+")) {
-        return name.split("+")[1];
-      } else {
-        return "0";
-      }
-    }) as Offset[];
-  }, [groupedUsers]);
 
   useEffect(() => {
-    console.log("height effect");
     const top = containerRef.current.offsetTop;
     containerRef.current.style.height = bodyHeight - top - 50 + "px";
 
     if (containerRef.current.scrollHeight > containerRef.current.clientHeight) {
       const diff =
         containerRef.current.scrollHeight - containerRef.current.clientHeight;
-      console.log(diff, worldRef.current.clientHeight - diff);
+      worldRef.current.style.height = "100%";
       worldRef.current.style.height =
         worldRef.current.clientHeight - diff + "px";
-      console.log(diff, worldRef.current.clientHeight - diff);
     }
 
     const handleResize = () => {
@@ -68,7 +57,45 @@ function App() {
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [containerRef, worldRef, bodyHeight]);
+  }, [worldRef, bodyHeight]);
+
+  const effectZones = useOffsetEffect({
+    color: "#f0c",
+    interval: 75,
+    delay: 250,
+  });
+  const [overZone, setOverZone] = useState<Offset>(null);
+  const zones = useMemo(() => {
+    const zones = {
+      ...groupedUsers.reduce(
+        (acc, [zone]) => ({
+          ...acc,
+          [zoneToOffset(zone)]: {
+            color: "#f00",
+            opacity: selectedZone ? 0.2 : 0.5,
+          },
+        }),
+        {}
+      ),
+    };
+
+    if (selectedZone) {
+      zones[zoneToOffset(selectedZone)] = { color: "#f00", opacity: 0.5 };
+    }
+
+    if (overZone) {
+      zones[overZone] = { color: "#f0c", opacity: 0.6 };
+    }
+
+    return zones;
+  }, [groupedUsers, selectedZone, overZone]);
+
+  const handleOver = (offset: Offset) => {
+    setOverZone(offset);
+  };
+  const handleOut = () => {
+    setOverZone(null);
+  };
 
   return (
     <div className="App" ref={containerRef}>
@@ -89,7 +116,13 @@ function App() {
             height: "100%",
           }}
         >
-          {project && <World highlight={highlight} />}
+          {project && (
+            <World
+              zones={effectZones || zones}
+              onMouseOver={handleOver}
+              onMouseOut={handleOut}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -100,7 +133,9 @@ aha.on("page", ({ fields, onUnmounted }, { identifier, settings }) => {
   return (
     <>
       <Style />
-      <App />
+      <RecoilRoot>
+        <App />
+      </RecoilRoot>
     </>
   );
 });
