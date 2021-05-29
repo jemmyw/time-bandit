@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 // @ts-ignore
 import lines from "../images/lineso.svg";
 import { SvgObject } from "../SvgObject";
@@ -67,7 +61,7 @@ export const offsets: Offset[] = [
 ];
 
 const getLabel = (el: SVGElement) => el.getAttribute("inkscape:label");
-const nodeIsElement = (node: ChildNode): node is SVGElement =>
+const nodeIsElement = (node: any): node is SVGElement =>
   (node as any).setAttribute;
 export interface ZoneProps {
   color?: string;
@@ -149,27 +143,10 @@ export const World: React.FC<Props> = ({
         ...(svg.querySelectorAll(`#${zonesGroup.id} > g`) as any),
       ].reverse() as SVGElement[];
 
-      const zoneEvent =
-        (callback?: (offset: Offset) => void) => (event: any) => {
-          if (!callback) return;
-          const path = event.target as SVGElement;
-          const zone = path.parentElement as any as SVGElement;
-          const offset = getLabel(zone) as Offset;
-          callback(offset);
-        };
-      const clickEvent = zoneEvent(onClick);
-      const mouseOverEvent = zoneEvent(onMouseOver);
-      const mouseOutEvent = zoneEvent(onMouseOut);
       const zoneState: Partial<Record<Offset, SVGElement>> = {};
 
-      zones.forEach((zone, idx) => {
+      zones.forEach((zone) => {
         zone.style.opacity = "0.0";
-
-        zone.childNodes.forEach((group) => {
-          group.addEventListener("mouseover", mouseOverEvent);
-          group.addEventListener("mouseout", mouseOutEvent);
-          group.addEventListener("click", clickEvent);
-        });
 
         const zoneOffset = getLabel(zone) as Offset;
         if (zoneOffset) zoneState[zoneOffset] = zone;
@@ -182,18 +159,48 @@ export const World: React.FC<Props> = ({
         timeouts.forEach((timeout) => {
           clearTimeout(timeout);
         });
-
-        zones.forEach((zone) => {
-          zone.childNodes.forEach((group) => {
-            group.removeEventListener("mouseover", mouseOverEvent);
-            group.removeEventListener("mouseout", mouseOutEvent);
-            group.removeEventListener("click", clickEvent);
-          });
-        });
       };
     },
     []
   );
+
+  useEffect(() => {
+    const zoneEvent = (callback?: (offset: Offset) => void) => (event: any) => {
+      if (!callback) return;
+      const path = event.target as SVGElement;
+      const zone = path.parentElement as any as SVGElement;
+      const offset = getLabel(zone) as Offset;
+      callback(offset);
+    };
+    const events = [
+      ["mouseover", onMouseOver],
+      ["mouseout", onMouseOut],
+      ["click", onClick],
+    ]
+      .filter(([_, ev]) => typeof ev === "function")
+      .map(([name, ev]) => [name, zoneEvent(ev as any)]) as [
+      string,
+      EventListenerOrEventListenerObject
+    ][];
+
+    const zoneParents = Object.values(zones).filter(nodeIsElement);
+
+    zoneParents.forEach((zoneParent) => {
+      zoneParent.childNodes.forEach((group) => {
+        events.forEach(([name, event]) => group.addEventListener(name, event));
+      });
+    });
+
+    return () => {
+      zoneParents.forEach((zoneParent) => {
+        zoneParent.childNodes.forEach((group) => {
+          events.forEach(([name, event]) =>
+            group.removeEventListener(name, event)
+          );
+        });
+      });
+    };
+  }, [zones, onMouseOver, onMouseOut, onClick]);
 
   return (
     <div className="world">

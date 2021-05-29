@@ -1,4 +1,10 @@
-import React, { createRef, useEffect, useMemo, useState } from "react";
+import React, {
+  createRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { RecoilRoot, useRecoilState } from "recoil";
 import { groupByZone } from "../lib/groupByZone";
 import { useOffsetEffect } from "../lib/useOffsetEffect";
@@ -110,12 +116,12 @@ function App() {
     return zones;
   }, [groupedUsers, selectedZone, overZone]);
 
-  const handleOver = (offset: Offset) => {
+  const handleOver = useCallback((offset: Offset) => {
     setOverZone(offset);
-  };
-  const handleOut = () => {
+  }, []);
+  const handleOut = useCallback(() => {
     setOverZone(null);
-  };
+  }, []);
 
   return (
     <div className="App" ref={containerRef}>
