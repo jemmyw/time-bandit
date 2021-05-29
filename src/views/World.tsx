@@ -138,7 +138,6 @@ export const World: React.FC<Props> = ({
 
       zonesGroup.id = "zones";
 
-      const timeouts: NodeJS.Timeout[] = [];
       const zones = [
         ...(svg.querySelectorAll(`#${zonesGroup.id} > g`) as any),
       ].reverse() as SVGElement[];
@@ -154,12 +153,6 @@ export const World: React.FC<Props> = ({
 
       zonesGroup.style.opacity = "1.0";
       setZones(zoneState);
-
-      return () => {
-        timeouts.forEach((timeout) => {
-          clearTimeout(timeout);
-        });
-      };
     },
     []
   );
