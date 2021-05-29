@@ -37,14 +37,14 @@ export function Style() {
           flex-shrink: 0;
           justify-content: space-between;
           gap: 5px;
-          margin: 0 20px;
+          margin: 0 7px 0 20px;
           overflow-x: auto;
         }
 
         .zone-group {
           background: var(--aha-gray-100);
           border: 1px solid var(--aha-gray-400);
-          border-radius: 5px;
+          /* border-radius: 5px; */
           display: flex;
           flex-direction: column;
           gap: 10px;
@@ -54,7 +54,7 @@ export function Style() {
         .zone-group--header {
           background-color: var(--aha-gray-900);
           color: var(--aha-gray-100);
-          border-radius: 5px 5px 0 0;
+          /* border-radius: 5px 5px 0 0; */
           padding: 2px 5px;
         }
 
@@ -104,23 +104,21 @@ export function Style() {
 
         .zone-user--avatar {
           z-index: 1;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          overflow: hidden;
+          box-shadow: 0px 0px 2px 0px rgb(0 0 0 / 49%);
         }
 
         .zone-user--avatar img {
-          flex-shrink: 0;
-          border-radius: 50%;
-          width: 32px;
-          height: 32px;
-          min-width: 32px;
-          min-height: 32px;
-          box-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
+          width: 100%;
         }
 
         .project {
-          flex-grow: 1;
+          min-width: 350px;
           border: 1px solid var(--aha-gray-400);
           background: var(--aha-gray-100);
-          margin: 7px 0 18px 0;
         }
 
         .project--title {

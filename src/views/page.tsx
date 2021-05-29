@@ -27,7 +27,7 @@ const loadUsers = async () => {
         "name",
         "timezone",
         // @ts-ignore
-        `avatarUrl(size: ${aha.enums.AvatarSizeEnum.SIZE_40})`
+        `avatarUrl(size: ${aha.enums.AvatarSizeEnum.SIZE_160})`
       ),
     })
     .find(currentProject.id);
@@ -130,29 +130,33 @@ function App() {
       <div className="title">
         Time Bandit {project && <span> - {project.name}</span>}
       </div>
-      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        {project ? (
-          <GroupedUsers users={users} groupedUsers={groupedUsers} />
-        ) : (
-          <aha-spinner />
-        )}
+      <div style={{ display: "flex", height: "100%" }}>
         <div
-          ref={worldRef}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            height: "100%",
-          }}
+          style={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
-          {project && (
-            <World
-              zones={effectZones || zones}
-              onMouseOver={handleOver}
-              onMouseOut={handleOut}
-            />
+          {project ? (
+            <GroupedUsers users={users} groupedUsers={groupedUsers} />
+          ) : (
+            <aha-spinner />
           )}
-          {project && <Project project={project} zones={projectZones} />}
+          <div
+            ref={worldRef}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              height: "100%",
+            }}
+          >
+            {project && (
+              <World
+                zones={effectZones || zones}
+                onMouseOver={handleOver}
+                onMouseOut={handleOut}
+              />
+            )}
+          </div>
         </div>
+        {project && <Project project={project} zones={projectZones} />}
       </div>
     </div>
   );
