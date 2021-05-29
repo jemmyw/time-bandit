@@ -15,9 +15,8 @@ export function Style() {
     <style>
       {css`
         .title {
-          color: var(--aha-green-800);
-          font-size: 20px;
-          text-align: center;
+          font-size: 24px;
+          font-weight: 300;
           margin: 20px;
         }
 

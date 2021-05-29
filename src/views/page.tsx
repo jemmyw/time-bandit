@@ -126,7 +126,7 @@ function App() {
   return (
     <div className="App" ref={containerRef}>
       <div className="title">
-        Time Bandit {project && <span>{project.name}</span>}
+        Time Bandit {project && <span> - {project.name}</span>}
       </div>
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         {project ? (
