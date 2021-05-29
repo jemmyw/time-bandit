@@ -7,7 +7,7 @@ import React, {
 } from "react";
 
 interface Props {
-  onLoad(svg: Document): Function | null;
+  onLoad?: (svg: Document) => Function | undefined;
   data: string;
   style?: React.CSSProperties;
   className?: string;
@@ -21,7 +21,7 @@ export const SvgObject: React.FC<Props> = ({
   className,
   hideUntilLoad,
 }) => {
-  const objectRef = useRef<HTMLObjectElement>();
+  const objectRef = useRef<HTMLObjectElement>(null);
   const unloadRef = useRef<Function>();
   const [loaded, setLoaded] = useState(false);
   const [called, setCalled] = useState(false);
@@ -48,7 +48,7 @@ export const SvgObject: React.FC<Props> = ({
     // Call the unload function if we're re-running
     if (unloadRef.current) unloadRef.current();
 
-    let unloadFunction: Function | null = null;
+    let unloadFunction: Function | undefined;
     if (onLoad) {
       unloadFunction = onLoad(svg);
     } else {

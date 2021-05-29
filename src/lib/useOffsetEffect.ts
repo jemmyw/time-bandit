@@ -13,8 +13,9 @@ export function useOffsetEffect({
   const [zones, setZones] = useState<ZoneProp | null>(null);
 
   useEffect(() => {
-    const timeouts = [];
-    const fn = offsets
+    const timeouts: NodeJS.Timeout[] = [];
+
+    const fn = (offsets as string[])
       .concat([...Array(6).keys()].map(() => "a"))
       .map((offset, idx) =>
         offsets

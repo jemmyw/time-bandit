@@ -6,7 +6,11 @@ import { zoneToOffset } from "../lib/zoneToOffset";
 import { Style } from "../Style";
 import { GroupedUsers } from "./GroupedUsers";
 import { selectedZoneState } from "./store";
-import { Offset, offsets, World, ZoneProps } from "./World";
+import { Offset, offsets, World, ZoneProp } from "./World";
+
+declare global {
+  var currentProject: { id: string };
+}
 
 const loadUsers = async () => {
   return await aha.models.Project.select("name", "isTeam")
@@ -15,6 +19,7 @@ const loadUsers = async () => {
         "id",
         "name",
         "timezone",
+        // @ts-ignore
         `avatarUrl(size: ${aha.enums.AvatarSizeEnum.SIZE_40})`
       ),
     })
@@ -30,6 +35,7 @@ function App() {
   const [users, setUsers] = useState<Aha.User[]>([]);
 
   const [selectedZone] = useRecoilState(selectedZoneState);
+  const [overZone, setOverZone] = useState<Offset | null>(null);
 
   useEffect(() => {
     loadUsers().then((project) => {
@@ -41,15 +47,17 @@ function App() {
   const groupedUsers = useMemo(() => groupByZone(users), [users]);
 
   useEffect(() => {
-    const top = containerRef.current.offsetTop;
-    containerRef.current.style.height = bodyHeight - top - 50 + "px";
+    const containerEl = containerRef.current;
+    const worldEl = worldRef.current;
+    if (!containerEl) return;
 
-    if (containerRef.current.scrollHeight > containerRef.current.clientHeight) {
-      const diff =
-        containerRef.current.scrollHeight - containerRef.current.clientHeight;
-      worldRef.current.style.height = "100%";
-      worldRef.current.style.height =
-        worldRef.current.clientHeight - diff + "px";
+    const top = containerEl.offsetTop;
+    containerEl.style.height = bodyHeight - top - 50 + "px";
+
+    if (worldEl && containerEl.scrollHeight > containerEl.clientHeight) {
+      const diff = containerEl.scrollHeight - containerEl.clientHeight;
+      worldEl.style.height = "100%";
+      worldEl.style.height = worldEl.clientHeight - diff + "px";
     }
 
     const handleResize = () => {
@@ -64,9 +72,8 @@ function App() {
     interval: 50,
     delay: 50,
   });
-  const [overZone, setOverZone] = useState<Offset>(null);
   const zones = useMemo(() => {
-    const zones = {
+    const zones: ZoneProp = {
       ...groupedUsers.reduce(
         (acc, [zone]) => ({
           ...acc,
@@ -142,7 +149,7 @@ function App() {
   );
 }
 
-aha.on("page", ({ fields, onUnmounted }, { identifier, settings }) => {
+aha.on("page", ({}, {}) => {
   return (
     <>
       <Style />
