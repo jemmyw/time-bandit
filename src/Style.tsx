@@ -25,7 +25,7 @@ export function Style() {
         }
 
         .world {
-          margin: 0 20px;
+          margin: 0 0 0 14px;
           background-image: url(${zones});
           background-repeat: no-repeat;
           background-size: contain;
@@ -114,6 +114,24 @@ export function Style() {
           min-width: 32px;
           min-height: 32px;
           box-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .project {
+          flex-grow: 1;
+          border: 1px solid var(--aha-gray-400);
+          background: var(--aha-gray-100);
+          margin: 7px 0 18px 0;
+        }
+
+        .project--title {
+          font-size: 22px;
+          font-weight: 300;
+          padding: 10px 0 10px 12px;
+          border-bottom: 1px solid var(--aha-gray-400);
+        }
+
+        .project--details {
+          padding: 10px 12px;
         }
       `}
     </style>

@@ -12,7 +12,10 @@ export const GroupedUsers: React.FC<Props> = ({ users, groupedUsers }) => {
   const [hideNames, setHideNames] = useState(false);
 
   useEffect(() => {
-    if (elementRef.current.clientWidth < elementRef.current.scrollWidth) {
+    const current = elementRef.current;
+    if (!current) return;
+
+    if (current.clientWidth < current.scrollWidth) {
       setHideNames(true);
     }
   }, [elementRef, groupedUsers]);

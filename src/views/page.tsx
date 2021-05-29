@@ -6,11 +6,12 @@ import React, {
   useState,
 } from "react";
 import { RecoilRoot, useRecoilState } from "recoil";
-import { groupByZone } from "../lib/groupByZone";
+import { groupByZone, zonesForItems } from "../lib/groupByZone";
 import { useOffsetEffect } from "../lib/useOffsetEffect";
 import { zoneToOffset } from "../lib/zoneToOffset";
 import { Style } from "../Style";
 import { GroupedUsers } from "./GroupedUsers";
+import { Project } from "./Project";
 import { selectedZoneState } from "./store";
 import { Offset, offsets, World, ZoneProp } from "./World";
 
@@ -51,6 +52,7 @@ function App() {
   }, []);
 
   const groupedUsers = useMemo(() => groupByZone(users), [users]);
+  const projectZones = useMemo(() => zonesForItems(users), [users]);
 
   useEffect(() => {
     const containerEl = containerRef.current;
@@ -58,7 +60,7 @@ function App() {
     if (!containerEl) return;
 
     const top = containerEl.offsetTop;
-    containerEl.style.height = bodyHeight - top - 50 + "px";
+    containerEl.style.height = bodyHeight - top - 100 + "px";
 
     if (worldEl && containerEl.scrollHeight > containerEl.clientHeight) {
       const diff = containerEl.scrollHeight - containerEl.clientHeight;
@@ -149,6 +151,7 @@ function App() {
               onMouseOut={handleOut}
             />
           )}
+          {project && <Project project={project} zones={projectZones} />}
         </div>
       </div>
     </div>
