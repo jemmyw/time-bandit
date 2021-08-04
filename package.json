@@ -18,6 +18,9 @@
     "esbuild": "^0.12.3"
   },
   "ahaExtension": {
+    "cspSources": [
+      "blob:"
+    ],
     "contributes": {
       "views": {
         "page": {
